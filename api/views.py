@@ -9,6 +9,13 @@ from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from django.http import Http404
 from rest_framework import generics,mixins,viewsets
+from blog.models import Blog,Comment
+from blog.serializers import BlogSerializer,CommentSerializer
+from .paginations import CustomPagination
+from employees.filters import EmployeeFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter ,OrderingFilter
+
 
 
 @api_view(['GET', 'POST'])
@@ -158,3 +165,37 @@ def studentDetailView(req, pk):
 class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class=EmployeeSerializer
+    pagination_class=CustomPagination
+    filterset_class = EmployeeFilter
+    filter_backends = [DjangoFilterBackend]
+    ordering_fields=['id']
+
+
+
+class BlogsView(generics.ListCreateAPIView):
+    queryset = Blog.objects.all()
+    serializer_class= BlogSerializer
+    pagination_class=CustomPagination
+    filter_backends = [SearchFilter,OrderingFilter]
+    search_fields=['blog_name','blog_body']
+    # search_fields=['^blog_name'] # return the data with first letter matching 
+
+
+
+class CommentsView(generics.ListCreateAPIView):
+    queryset=Comment.objects.all()
+    serializer_class=CommentSerializer
+
+class BlogDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset=Blog.objects.all()
+    serializer_class=BlogSerializer
+    lookup_field='pk'
+    
+    
+
+class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset=Comment.objects.all()
+    serializer_class=CommentSerializer
+    lookup_field='pk'
+
+
